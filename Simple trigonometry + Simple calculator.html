@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Trigonometric Equation Checker and Calculator</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #3d3f41;
+            padding: 40px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+        .card {
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(255, 1, 1, 0.1);
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background-color: #0077ff;
+            color: rgb(255, 255, 255);
+            font-size: 1.5em;
+            border-bottom: 0;
+            border-radius: 8px 8px 0 0;
+        }
+        .card-body {
+            padding: 30px;
+        }
+        .btn {
+            margin: 2px;
+        }
+        .btn-secondary {
+            background-color: #49555f;
+            border: none;
+        }
+        .calculator {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        .calculator button {
+            padding: 20px;
+            font-size: 1.2em;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        .calculator button.operator {
+            background-color: #ff0000;
+            color: white;
+        }
+        .calculator button.operator:hover {
+            background-color: #001aff;
+        }
+        .calculator button.double {
+            grid-column: span 2;
+        }
+        .calculator button.equal {
+            grid-column: span 4;
+            background-color: #28a745;
+            color: white;
+        }
+        .calculator button.equal:hover {
+            background-color: #07f0bd;
+        }
+        .calculator input {
+            grid-column: span 4;
+            padding: 15px;
+            font-size: 1.5em;
+            border: 2px solid #1277dd;
+            border-radius: 5px;
+            text-align: right;
+        }
+        .result p {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 1.2em;
+        }
+        .form-group label {
+            font-weight: bold;
+        }
+        .form-group small {
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <!-- Trigonometric Equation Checker -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header text-center">
+                        Advanced Trigonometric Equation Checker
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="lhs">Enter the LHS expression (e.g., sin(30 degrees) + log(10)): </label>
+                            <input type="text" id="lhs" class="form-control" placeholder="Enter LHS expression" required>
+                            <small id="lhsHelp" class="form-text text-muted">Use trigonometric functions with degrees or radians, and logarithmic functions.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="rhs">Enter the RHS expression (e.g., 1): </label>
+                            <input type="text" id="rhs" class="form-control" placeholder="Enter RHS expression" required>
+                            <small id="rhsHelp" class="form-text text-muted">Provide a numerical value or expression for comparison.</small>
+                        </div>
+
+                        <button class="btn btn-primary" id="check-btn">Check Equation</button>
+                        <button class="btn btn-secondary" id="clear-btn">Clear</button>
+
+                        <div id="result" class="result"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scientific Calculator -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header text-center">
+                        Simple Calculator
+                    </div>
+                    <div class="card-body">
+                        <div class="calculator">
+                            <input type="text" id="calc-display" disabled>
+                            <button class="btn btn-light" onclick="appendToCalc('7')">7</button>
+                            <button class="btn btn-light" onclick="appendToCalc('8')">8</button>
+                            <button class="btn btn-light" onclick="appendToCalc('9')">9</button>
+                            <button class="btn btn-light operator" onclick="appendToCalc('/')">/</button>
+                            
+                            <button class="btn btn-light" onclick="appendToCalc('4')">4</button>
+                            <button class="btn btn-light" onclick="appendToCalc('5')">5</button>
+                            <button class="btn btn-light" onclick="appendToCalc('6')">6</button>
+                            <button class="btn btn-light operator" onclick="appendToCalc('*')">*</button>
+                            
+                            <button class="btn btn-light" onclick="appendToCalc('1')">1</button>
+                            <button class="btn btn-light" onclick="appendToCalc('2')">2</button>
+                            <button class="btn btn-light" onclick="appendToCalc('3')">3</button>
+                            <button class="btn btn-light operator" onclick="appendToCalc('-')">-</button>
+                            
+                            <button class="btn btn-light double" onclick="appendToCalc('0')">0</button>
+                            <button class="btn btn-light" onclick="appendToCalc('.')">.</button>
+                            <button class="btn btn-light operator" onclick="appendToCalc('+')">+</button>
+                            <button class="btn btn-light equal" onclick="calculate()">=</button>
+                            
+                            <button class="btn btn-light double" onclick="clearCalc()">C</button>
+                            <button class="btn btn-light" onclick="backspace()">⌫</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include mathjs library from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const math = window.math;
+        const calcDisplay = document.getElementById('calc-display');
+
+        function degreesToRadians(degrees) {
+            return degrees * Math.PI / 180;
+        }
+
+        function convertToRadians(angle) {
+            const match = angle.match(/^(\d+(\.\d+)?)\s*degrees$/i);
+            if (match) {
+                return degreesToRadians(parseFloat(match[1]));
+            }
+            // Handle radians input directly
+            return angle;
+        }
+
+        function preprocessExpression(expr) {
+            expr = expr.replace(/(\bsin|cos|tan)\(([^)]+)\)/gi, (match, func, angle) => {
+                const radian = convertToRadians(angle);
+                return `${func}(${radian})`;
+            });
+            expr = expr.replace(/log\(([^)]+)\)/gi, (_, value) => `log(${value})`);
+            expr = expr.replace(/exp\(([^)]+)\)/gi, (_, value) => `exp(${value})`);
+            return expr;
+        }
+
+        function formatNumber(num) {
+            return num.toFixed(3);
+        }
+
+        function checkEquation() {
+            const lhsInput = document.getElementById('lhs').value.trim();
+            const rhsInput = document.getElementById('rhs').value.trim();
+
+            if (!lhsInput || !rhsInput) {
+                document.getElementById('result').innerHTML = '<div class="alert alert-warning">Please enter both LHS and RHS expressions.</div>';
+                return;
+            }
+
+            const lhsExpr = preprocessExpression(lhsInput);
+            const rhsExpr = preprocessExpression(rhsInput);
+
+            document.getElementById('result').innerHTML = '<div class="alert alert-info">Evaluating...</div>';
+
+            try {
+                const lhsValue = math.evaluate(lhsExpr);
+                const rhsValue = math.evaluate(rhsExpr);
+
+                const formattedLhsValue = formatNumber(lhsValue);
+                const formattedRhsValue = formatNumber(rhsValue);
+
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = `LHS: ${formattedLhsValue} <br> RHS: ${formattedRhsValue}`;
+
+                if (Math.abs(lhsValue - rhsValue) < 1e-3) {
+                    resultDiv.innerHTML += '<div class="alert alert-success">The equation is TRUE.</div>';
+                } else {
+                    resultDiv.innerHTML += '<div class="alert alert-danger">The equation is FALSE.</div>';
+                }
+            } catch (error) {
+                document.getElementById('result').innerHTML = `<div class="alert alert-danger">Error evaluating expressions: ${error.message}</div>`;
+            }
+        }
+
+        function clearFields() {
+            document.getElementById('lhs').value = '';
+            document.getElementById('rhs').value = '';
+            document.getElementById('result').innerHTML = '';
+        }
+
+        function appendToCalc(value) {
+            calcDisplay.value += value;
+        }
+
+        function calculate() {
+            try {
+                // Replace ^2 with **2 for exponentiation and handle sqrt()
+                const expression = calcDisplay.value
+                    .replace(/\^2/g, '**2')
+                    .replace(/sqrt\(/g, 'sqrt(');
+                const result = math.evaluate(expression);
+                calcDisplay.value = formatNumber(result);
+            } catch (error) {
+                calcDisplay.value = 'Error';
+            }
+        }
+
+        function clearCalc() {
+            calcDisplay.value = '';
+        }
+
+        function backspace() {
+            calcDisplay.value = calcDisplay.value.slice(0, -1);
+        }
+
+        document.getElementById('check-btn').addEventListener('click', checkEquation);
+        document.getElementById('clear-btn').addEventListener('click', clearFields);
+
+        document.querySelectorAll('.calculator button').forEach(button => {
+            button.addEventListener('click', function() {
+                const value = this.innerText;
+                if (value === '=') {
+                    calculate();
+                } else if (value === 'C') {
+                    clearCalc();
+                } else if (value === '⌫') {
+                    backspace();
+                } else {
+                    appendToCalc(value);
+                }
+            });
+        });
+    });
+    </script>
+</body>
+</html>
